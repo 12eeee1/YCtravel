@@ -164,3 +164,26 @@ if __name__ == "__main__":
     # ngrok http 5000 (預設 Flask port 是 5000)
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
+def handle_message(event):
+    # 確保收到的確實是文字訊息
+    if not isinstance(event.message, TextMessage):
+        return
+
+    user_id = event.source.user_id
+    user_message = event.message.text.strip().upper()  # 轉換為大寫以利比對
+
+    # --- [新增] 檢查是否為重置指令 ---
+    if user_message == 'RESET' or user_message == '重置':
+        # 呼叫更新函數，將進度設回 L01
+        update_user_level(user_id, 'L01')
+        reply_text = "🕵️‍♂️ **進度已重設！** 您已回到第一關。請輸入 L01 的題目答案開始挑戰："
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_text)
+        )
+        return # 處理完畢，直接返回
+
+    # --- [原有邏輯] 判斷玩家當前關卡 ---
+    current_level_id = get_user_level(user_id)
+    # ... (後續的遊戲邏輯，例如查詢關卡詳情、比對答案等)
