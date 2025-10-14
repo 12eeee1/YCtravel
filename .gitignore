@@ -1,0 +1,6 @@
+# .gitignore 檔案內容
+venv/             # 忽略虛擬環境
+__pycache__/      # 忽略 Python 快取
+*.pyc             # 忽略 Python 快取
+quest_game.db     # 忽略本地 SQLite 資料庫 (Heroku上要用PostgreSQL或每次重設)
+.env              # 忽略機密設定檔案
