@@ -30,41 +30,49 @@ handler = WebhookHandler(CHANNEL_SECRET)
 # [新增] question_image 欄位：該關卡題目所需的圖片 URL
 LEVEL_DATA = {
     'L01': {
-        'question': '找出這張照片上，被詩人稱為「臺陽」的植物是什麼？\n\n（請直接回覆答案）',
+        'question': '圓山站站名的日文為何？（羅馬拼音）\n\n（請直接回覆答案）',
         'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg', # L01 題目圖片 URL
-        'answer': '醉花陰',
-        'next_clue': '✅ 恭喜解鎖 L02！下一個謎題在城內最古老的廟宇裡。請找出位於「赤崁樓」正前方的贔屭碑，它們上方橫批的內容是什麼？',
+        'answer': 'Maruyama',
+        'next_clue': '✅ 恭喜解鎖 第二關！下一個謎題在台北孔廟。\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
         'next_clue_image': None,
         'next_level_id': 'L02'
     },
     'L02': {
-        'question': '赤崁樓正前方的贔屭碑，上方橫批的內容是什麼？',
+        'question': '🙏🎸🏹🐴🧮✈️',
         'question_image': None,
-        'answer': '光耀萬代',
-        'next_clue': '✅ 恭喜解鎖 L03！請前往安平古堡（熱蘭遮城）西側的城牆邊。這裡有一塊重要的碑文，碑文上刻著「安平古堡」這四個字旁的詩句，是哪四個字？',
+        'answer': '禮樂射御書數',
+        'next_clue': '✅ 恭喜解鎖 L03！請前往保安宮解開下一關',
         'next_clue_image': None,
         'next_level_id': 'L03'
     },
     'L03': {
-        'question': '安平古堡西側城牆邊的碑文，碑文上刻著「安平古堡」這四個字旁的詩句，是哪四個字？',
+        'question': '側城牆邊的碑文，碑文上刻著甚麼字？',
         'question_image': None,
-        'answer': '億載金城', 
-        'next_clue': '✅ 恭喜解鎖 L04！來到億載金城，請觀察城牆上方的「砲臺」。數一數城牆上總共有幾座這種方形的砲座？ (只計算主城牆上的)',
-        'next_clue_image': None,
+        'answer': '保安', 
+        'next_clue': '✅ 恭喜解鎖 L04！請回到保安宮正門對面，找到圖片中的石碑，石碑後方草叢藏著下一關的線索!',
+        'next_clue_image': "https://lh3.googleusercontent.com/T1Y2Fd4-pDSvwfoqufBeNdW5bvcQSTog57_WRpT54GHivduCS1uRtimpygTvjvM_yZ-JQOQHjkNmxa0n9dBcnYItnjV8FwW0AZI",
         'next_level_id': 'L04'
     },
     'L04': {
-        'question': '億載金城城牆上總共有幾座方形的砲座？',
+        'question': '請依照取得的線索，解開謎底',
         'question_image': None,
-        'answer': '7', 
-        'next_clue': '✅ 恭喜解鎖 L05！請到臺南大天后宮，在正殿的龍邊（右側）有一座供奉月老的偏殿。請數一數月老殿中的籤筒，共有多少支籤？',
+        'answer': '頂', 
+        'next_clue': '✅ 恭喜解鎖 L05！請到樹人書院',
         'next_clue_image': None,
         'next_level_id': 'L05'
     },
     'L05': {
-        'question': '臺南大天后宮月老殿中的籤筒，共有多少支籤？',
+        'question': '請到指定位置尋找實體寶藏、並從中獲取題目',
         'question_image': None,
-        'answer': '15', 
+        'answer': '鳳梨', 
+        'next_clue': '看不太懂下面這張圖片想表達什麼嗎？ 前往下一個地點找看看線索吧！',
+        'next_clue_image': "http://lh3.googleusercontent.com/hU71LibhOa0LSk8UYHnsHzd2VjzPtOH7nvDyqaiqO_zxD3ttVpkYJQ5rqbLqbEmmk5Mzf6pI3J6ZO9nUGiEEkHMPZbwE1R_-OR4",
+        'next_level_id': 'L06'
+    },
+        'L06': {
+        'question': '解開題目後，可以跟我確認答案',
+        'question_image': None,
+        'answer': '538.7833 7515', 
         'next_clue': '🎉 恭喜您完成所有關卡，探險成功！',
         'next_clue_image': None,
         'next_level_id': 'COMPLETED'
