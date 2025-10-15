@@ -55,7 +55,7 @@ LEVEL_DATA = {
     },
     'L04': {
         'question': '請依照取得的線索，解開謎底',
-        'question_image': "https://lh3.googleusercontent.com/T1Y2Fd4-pDSvwfoqufBeNdW5bvcQSTog57_WRpT54GHivduCS1uRtimpygTvjvM_yZ-JQOQHjkNmxa0n9dBcnYItnjV8FwW0AZI",
+        'question_image': "https://uniim1.shutterfly.com/render/00-tCSAnTilSzCx4nxHoRwR-OsY7sfclG4mZm-Nn2vUmQCyWie-ZHdnlLyb-qWoT-c04xJ2Twu75QF_jizMkB1ZdA?cn=THISLIFE&res=small&ts=1760515675",
         'answer': '頂', 
         'next_clue': '✅ 恭喜解鎖 L05！請到樹人書院',
         'next_clue_image': None,
@@ -71,7 +71,7 @@ LEVEL_DATA = {
     },
         'L06': {
         'question': '解開題目後，可以跟我確認答案',
-        'question_image': "http://lh3.googleusercontent.com/hU71LibhOa0LSk8UYHnsHzd2VjzPtOH7nvDyqaiqO_zxD3ttVpkYJQ5rqbLqbEmmk5Mzf6pI3J6ZO9nUGiEEkHMPZbwE1R_-OR4",
+        'question_image': "https://uniim1.shutterfly.com/render/00-tCSAnTilSzCx4nxHoRwR-OsY7sfclG4mZm-Nn2vUmQD2MI1F2Ch_1P4Nywpj2ge1Kwg5ydwHipy3aIZBf9dNYQ?cn=THISLIFE&res=small&ts=1760515675",
         'answer': '538.7833 7515', 
         'next_clue': '🎉 恭喜您完成所有關卡，探險成功！',
         'next_clue_image': None,
