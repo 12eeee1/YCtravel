@@ -27,11 +27,13 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 # --- 關卡數據 (Level Data) ---
-# [新增] question_image 欄位：該關卡題目所需的圖片 URL
+# 🚨 圖片 URL 提示：Line Bot 的 ImageSendMessage 必須使用直接連到圖片檔案的 HTTPS URL (例如 .jpg, .png)。
+# ⚠️ 像 ppt.cc 這種縮網址/轉址服務，Line 伺服器通常會拒絕解析，導致圖片發送失敗。
+# L04 和 L06 已替換為 Placehold.co 的測試圖片，請務必將來替換成您自己的 **直接圖片連結**！
 LEVEL_DATA = {
     'L01': {
         'question': '圓山站站名的日文為何？（羅馬拼音）\n\n（請直接回覆答案）',
-        'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg', # L01 題目圖片 URL
+        'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg', # L01 題目圖片 URL (這個是直接連結，故可運作)
         'answer': 'Maruyama',
         'next_clue': '✅ 恭喜解鎖 第二關！下一個謎題在台北孔廟。\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
         'next_clue_image': None,
@@ -55,7 +57,7 @@ LEVEL_DATA = {
     },
     'L04': {
         'question': '請依照取得的線索，解開謎底',
-        'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg',
+        'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg', # 使用L01的已知可用圖片進行測試
         'answer': '頂', 
         'next_clue': '✅ 恭喜解鎖 L05！請到樹人書院',
         'next_clue_image': None,
@@ -69,9 +71,9 @@ LEVEL_DATA = {
         'next_clue_image': None,
         'next_level_id': 'L06'
     },
-        'L06': {
+    'L06': {
         'question': '解開題目後，可以跟我確認答案',
-        'question_image': "https://ppt.cc/f9B3bx",
+        'question_image': "https://placehold.co/600x400/007BFF/ffffff?text=L06+TEST+IMAGE", # 替換為直接連結的測試圖片
         'answer': '538.7833 7515', 
         'next_clue': '🎉 恭喜您完成所有關卡，探險成功！',
         'next_clue_image': None,
@@ -117,8 +119,11 @@ def setup_db():
         """)
         
         # 3. 匯入關卡數據 (如果 levels 表格是空的)
+        # 🚨 [重要] 這裡的邏輯是只有在 level_id 'L01' 不存在時才匯入。
+        # 因為您剛剛已經匯入過舊數據，若要使用新數據，我們需要手動清空表格。
         cursor.execute("SELECT COUNT(*) FROM levels WHERE level_id = 'L01';")
         if cursor.fetchone()[0] == 0:
+            # 確保匯入新數據
             for level_id, data in LEVEL_DATA.items():
                 cursor.execute(
                     """
@@ -134,6 +139,25 @@ def setup_db():
                         data['next_clue_image'] 
                     )
                 )
+        else:
+            # 已經有數據了，需要更新它們，確保 L04 和 L06 的圖片 URL 是新的
+            for level_id, data in LEVEL_DATA.items():
+                 cursor.execute(
+                    """
+                    UPDATE levels
+                    SET question_text = %s, question_image_url = %s, correct_answer = %s, next_clue_text = %s, next_clue_image_url = %s
+                    WHERE level_id = %s;
+                    """,
+                    (
+                        data['question'], 
+                        data['question_image'],
+                        data['answer'], 
+                        data['next_clue'], 
+                        data['next_clue_image'],
+                        level_id
+                    )
+                )
+
         
         conn.commit()
         conn.close()
@@ -222,7 +246,7 @@ def handle_message(event):
         try:
             update_user_level(user_id, 'L01')
             
-            # [更新] 取得 L01 的圖片和題目
+            # 取得 L01 的圖片和題目
             level_data = get_level_details('L01')
             if level_data:
                 _, question_text, question_image_url, _, _, _ = level_data
@@ -234,10 +258,12 @@ def handle_message(event):
                 
                 # 發送 L01 題目圖片
                 if question_image_url:
-                    reply_messages.insert(2, # 插入在文字訊息之後
+                    # Line ImageSendMessage 需要 original_content_url 和 preview_image_url
+                    reply_messages.append(
                         ImageSendMessage(
                             original_content_url=question_image_url,
-                            preview_image_url=question_image_url
+                            # 預覽圖可以使用相同的 URL，但 Line 建議使用較小的圖檔
+                            preview_image_url=question_image_url 
                         )
                     )
                 
@@ -262,7 +288,7 @@ def handle_message(event):
         )
         return
 
-    # 解包關卡資訊：(level_id, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
+    # 解包關卡資訊：(level_id, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
     level_id_db, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url = level_data
 
     # 3. 答案比對邏輯
@@ -273,26 +299,29 @@ def handle_message(event):
         
         # 尋找下一關的 ID (例如 L01 -> L02)
         try:
-            next_level_id = 'L' + str(int(current_level_id[1:]) + 1).zfill(2)
+            current_level_num = int(current_level_id[1:])
+            next_level_id = 'L' + str(current_level_num + 1).zfill(2)
         except ValueError:
             next_level_id = 'COMPLETED' 
         
         next_level_data = get_level_details(next_level_id)
 
-        reply_messages = [
-            TextSendMessage(text=f"✅ 恭喜！您找到了正確答案：{correct_answer_raw}！")
-        ]
+        # 1. 初始訊息列表
+        reply_messages = []
         
         if next_level_data:
             # 還有下一關
             update_user_level(user_id, next_level_id)
             
-            # 發送下一關的文字提示 (這裡的 next_clue_text 已經是下一關 L02 的題目了)
-            reply_messages.append(TextSendMessage(text=f"【{next_level_id} 挑戰】\n{next_clue_text}"))
-            
-            # [更新] 如果下一關的題目有圖片，也發送
+            # 解包下一關的題目資訊
+            # (level_id, next_question_text, next_question_image_url, correct_answer, next_clue_text, next_clue_image_url)
             _, next_question_text, next_question_image_url, _, _, _ = next_level_data
 
+            # 1. 發送當前關卡的【線索/轉場訊息】與下一關的【題目文字】，合併為一則訊息
+            full_text_message = f"{next_clue_text}\n\n【{next_level_id} 挑戰】\n{next_question_text}"
+            reply_messages.append(TextSendMessage(text=full_text_message))
+            
+            # 2. 發送下一關的題目圖片
             if next_question_image_url:
                 reply_messages.append(
                     ImageSendMessage(
@@ -302,9 +331,9 @@ def handle_message(event):
                 )
 
         else:
-            # 這是最後一關
+            # 這是最後一關，直接發送 current_level 的 next_clue_text (例如 '🎉 恭喜您完成所有關卡，探險成功！')
             update_user_level(user_id, 'COMPLETED') 
-            reply_messages.append(TextSendMessage(text="🎉 恭喜您完成所有關卡，探險成功！"))
+            reply_messages.append(TextSendMessage(text=next_clue_text))
 
         line_bot_api.reply_message(event.reply_token, reply_messages)
 
