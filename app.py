@@ -50,12 +50,12 @@ LEVEL_DATA = {
         'question_image': None,
         'answer': '保安', 
         'next_clue': '✅ 恭喜解鎖 L04！請回到保安宮正門對面，找到圖片中的石碑，石碑後方草叢藏著下一關的線索!',
-        'next_clue_image': "https://lh3.googleusercontent.com/T1Y2Fd4-pDSvwfoqufBeNdW5bvcQSTog57_WRpT54GHivduCS1uRtimpygTvjvM_yZ-JQOQHjkNmxa0n9dBcnYItnjV8FwW0AZI",
+        'next_clue_image': None,
         'next_level_id': 'L04'
     },
     'L04': {
         'question': '請依照取得的線索，解開謎底',
-        'question_image': None,
+        'question_image': "https://lh3.googleusercontent.com/T1Y2Fd4-pDSvwfoqufBeNdW5bvcQSTog57_WRpT54GHivduCS1uRtimpygTvjvM_yZ-JQOQHjkNmxa0n9dBcnYItnjV8FwW0AZI",
         'answer': '頂', 
         'next_clue': '✅ 恭喜解鎖 L05！請到樹人書院',
         'next_clue_image': None,
@@ -66,12 +66,12 @@ LEVEL_DATA = {
         'question_image': None,
         'answer': '鳳梨', 
         'next_clue': '看不太懂下面這張圖片想表達什麼嗎？ 前往下一個地點找看看線索吧！',
-        'next_clue_image': "http://lh3.googleusercontent.com/hU71LibhOa0LSk8UYHnsHzd2VjzPtOH7nvDyqaiqO_zxD3ttVpkYJQ5rqbLqbEmmk5Mzf6pI3J6ZO9nUGiEEkHMPZbwE1R_-OR4",
+        'next_clue_image': None,
         'next_level_id': 'L06'
     },
         'L06': {
         'question': '解開題目後，可以跟我確認答案',
-        'question_image': None,
+        'question_image': "http://lh3.googleusercontent.com/hU71LibhOa0LSk8UYHnsHzd2VjzPtOH7nvDyqaiqO_zxD3ttVpkYJQ5rqbLqbEmmk5Mzf6pI3J6ZO9nUGiEEkHMPZbwE1R_-OR4",
         'answer': '538.7833 7515', 
         'next_clue': '🎉 恭喜您完成所有關卡，探險成功！',
         'next_clue_image': None,
