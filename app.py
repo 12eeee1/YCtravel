@@ -31,7 +31,7 @@ handler = WebhookHandler(CHANNEL_SECRET)
 LEVEL_DATA = {
     'L01': {
         'question': '找出這張照片上，被詩人稱為「臺陽」的植物是什麼？\n\n（請直接回覆答案）',
-        'question_image': 'https://placehold.co/600x400/007bff/ffffff?text=L01+%E9%A1%8C%E7%9B%AE%E5%9C%96%E7%89%87', # L01 題目圖片 URL
+        'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg', # L01 題目圖片 URL
         'answer': '醉花陰',
         'next_clue': '✅ 恭喜解鎖 L02！下一個謎題在城內最古老的廟宇裡。請找出位於「赤崁樓」正前方的贔屭碑，它們上方橫批的內容是什麼？',
         'next_clue_image': None,
