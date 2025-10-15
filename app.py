@@ -33,7 +33,7 @@ handler = WebhookHandler(CHANNEL_SECRET)
 LEVEL_DATA = {
     'L01': {
         'question': '圓山站站名的日文為何？（羅馬拼音）\n\n（請直接回覆答案）',
-        'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg', # L01 題目圖片 URL (這個是直接連結，故可運作)
+        'question_image': None, # L01 題目圖片 URL (這個是直接連結，故可運作)
         'answer': 'Maruyama',
         'next_clue': '✅ 恭喜解鎖 第二關！下一個謎題在台北孔廟。\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
         'next_clue_image': None,
@@ -57,7 +57,7 @@ LEVEL_DATA = {
     },
     'L04': {
         'question': '請依照取得的線索，解開謎底',
-        'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg', # 使用L01的已知可用圖片進行測試
+        'question_image': 'http://lh3.googleusercontent.com/T1Y2Fd4-pDSvwfoqufBeNdW5bvcQSTog57_WRpT54GHivduCS1uRtimpygTvjvM_yZ-JQOQHjkNmxa0n9dBcnYItnjV8FwW0AZI', # 使用L01的已知可用圖片進行測試
         'answer': '頂', 
         'next_clue': '✅ 恭喜解鎖 L05！請到樹人書院',
         'next_clue_image': None,
@@ -72,9 +72,9 @@ LEVEL_DATA = {
         'next_level_id': 'L06'
     },
     'L06': {
-        'question': '解開題目後，可以跟我確認答案',
-        'question_image': "https://placehold.co/600x400/007BFF/ffffff?text=L06+TEST+IMAGE", # 替換為直接連結的測試圖片
-        'answer': '538.7833 7515', 
+        'question': '解開題目後，可以跟我確認答案(不須輸入空格、標點符號)',
+        'question_image': "http://lh3.googleusercontent.com/hU71LibhOa0LSk8UYHnsHzd2VjzPtOH7nvDyqaiqO_zxD3ttVpkYJQ5rqbLqbEmmk5Mzf6pI3J6ZO9nUGiEEkHMPZbwE1R_-OR4", # 替換為直接連結的測試圖片
+        'answer': '53878337515', 
         'next_clue': '🎉 恭喜您完成所有關卡，探險成功！',
         'next_clue_image': None,
         'next_level_id': 'COMPLETED'
