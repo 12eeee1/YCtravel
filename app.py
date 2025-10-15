@@ -55,7 +55,7 @@ LEVEL_DATA = {
     },
     'L04': {
         'question': '請依照取得的線索，解開謎底',
-        'question_image': "https://ppt.cc/f1tiQx",
+        'question_image': 'https://s3.amazonaws.com/gs-geo-images/1478ada1-1afc-40fb-878a-b0bbdb741bee_sq250.jpg',
         'answer': '頂', 
         'next_clue': '✅ 恭喜解鎖 L05！請到樹人書院',
         'next_clue_image': None,
