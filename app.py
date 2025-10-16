@@ -47,7 +47,7 @@ LEVEL_DATA = {
         'question': '圓山站站名的日文為何？（羅馬拼音）\n\n（請直接回覆答案）',
         'question_image': None,
         'answer': 'Maruyama',
-        'next_clue': '✅ 恭喜解鎖 第二關！下一個謎題在台北孔廟。\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
+        'next_clue': '✅ 恭喜解鎖 L02！下一個謎題在台北孔廟。\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
         'next_clue_image': None,
         'next_level_id': 'L02'
     },
@@ -55,7 +55,7 @@ LEVEL_DATA = {
         'question': '🙏🎸🏹🐴🧮✈️',
         'question_image': None,
         'answer': '禮樂射御書數',
-        'next_clue': '✅ 恭喜解鎖 L03！請前往保安宮解開下一關',
+        'next_clue': '✅ 恭喜解鎖 L03！下一個謎題在保安宮。\n\n請前往https://maps.app.goo.gl/gD9w5eFzRzJ8fX9A7',
         'next_clue_image': None,
         'next_level_id': 'L03'
     },
@@ -71,7 +71,7 @@ LEVEL_DATA = {
         'question': '請依照取得的線索，解開謎底',
         'question_image': 'https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/04.jpg',
         'answer': '頂', 
-        'next_clue': '✅ 恭喜解鎖 L05！請到樹人書院',
+        'next_clue': '✅ 恭喜解鎖 L05！請前往樹人書院解開下一關謎題。',
         'next_clue_image': None,
         'next_level_id': 'L05'
     },
@@ -79,7 +79,7 @@ LEVEL_DATA = {
         'question': '請到指定位置尋找實體寶藏、並從中獲取題目',
         'question_image': None,
         'answer': '鳳梨', 
-        'next_clue': '看不太懂下面這張圖片想表達什麼嗎？ 前往下一個地點找看看線索吧！',
+        'next_clue': '看不太懂下面這張圖片想表達什麼嗎？ 前往下一個地點找看看線索吧！\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
         'next_clue_image': None,
         'next_level_id': 'L06'
     },
@@ -98,7 +98,8 @@ LEVEL_DATA = {
 def get_db_connection():
     """建立並回傳 PostgreSQL 連接，針對 Render 環境配置 SSL。"""
     if not DATABASE_URL:
-        raise ConnectionError("DATABASE_URL is not set.")
+        # 當 DATABASE_URL 未設定時，提供一個友善的錯誤訊息
+        raise ConnectionError("DATABASE_URL is not set. Please ensure the environment variable is configured.")
     
     # 使用 sslmode='require' 來滿足 Render 的安全要求
     return psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -122,10 +123,11 @@ def setup_db():
         """)
 
         # 2. 建立 users 表格 (追蹤玩家進度)
+        # current_level 現在用於儲存狀態，例如 'L01_ANSWERING' 或 'L01_WAITING'
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id VARCHAR(255) PRIMARY KEY,
-                current_level VARCHAR(10) NOT NULL,
+                current_level VARCHAR(30) NOT NULL, -- 加大長度以容納狀態字串
                 last_activity_time TIMESTAMP WITHOUT TIME ZONE
             );
         """)
@@ -175,11 +177,12 @@ def setup_db():
 
     except Exception as e:
         print(f"PostgreSQL 資料庫初始化失敗: {e}") 
+        # 即使初始化失敗，也讓應用程式繼續運行（但會影響功能）
         pass
 
 
 def get_user_level(user_id):
-    """取得玩家當前關卡ID，如果不存在則初始化為 WELCOME。"""
+    """取得玩家當前狀態ID，如果不存在則初始化為 WELCOME。"""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT current_level FROM users WHERE user_id = %s", (user_id,))
@@ -187,12 +190,14 @@ def get_user_level(user_id):
     conn.close()
     
     if result:
+        # 回傳用戶的當前狀態 (e.g., 'L01_ANSWERING', 'L01_WAITING', 'COMPLETED')
         return result[0]
     else:
         # 新玩家，初始化進度到 'WELCOME' 狀態，等待 START 指令
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO users VALUES (%s, 'WELCOME', NOW())", (user_id,))
+        # 確保在用戶不存在時，執行 INSERT 操作
+        cursor.execute("INSERT INTO users (user_id, current_level, last_activity_time) VALUES (%s, 'WELCOME', NOW())", (user_id,))
         conn.commit()
         conn.close()
         return 'WELCOME'
@@ -207,12 +212,12 @@ def get_level_details(level_id):
     conn.close()
     return details
 
-def update_user_level(user_id, next_level_id):
-    """更新玩家進度到下一關或重設關卡。"""
+def update_user_level(user_id, next_state):
+    """更新玩家進度狀態。"""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET current_level = %s, last_activity_time = NOW() WHERE user_id = %s", 
-                   (next_level_id, user_id))
+                   (next_state, user_id))
     conn.commit() 
     conn.close()
 
@@ -221,6 +226,8 @@ def clean_answer(text):
     text = str(text).lower().strip()
     for char in '.,?!;:"\'，。？！；：「」':
         text = text.replace(char, '')
+    # 針對中文習慣，將全形空格也移除
+    text = text.replace('　', '').replace(' ', '')
     return text
 
 # --- Line Bot Webhook 路由 ---
@@ -255,7 +262,6 @@ def handle_follow(event):
         TextSendMessage(text=WELCOME_MESSAGE) # 使用全域 WELCOME_MESSAGE
     )
 
-
 # --- 訊息處理函數 ---
 
 @handler.add(MessageEvent, message=TextMessage)
@@ -263,6 +269,7 @@ def handle_message(event):
     user_id = event.source.user_id
     user_input = event.message.text
     user_message_upper = user_input.strip().upper()
+    user_input_normalized = clean_answer(user_input)
     
     # 1. 處理重置指令 (RESET/重置)
     if user_message_upper == 'RESET' or user_message_upper == '重置':
@@ -283,11 +290,11 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 重置進度失敗，請檢查資料庫連線或稍後再試。"))
         return
 
-    # 2. 取得玩家當前關卡資訊
-    current_level_id = get_user_level(user_id)
+    # 2. 取得玩家當前關卡/狀態資訊
+    current_state = get_user_level(user_id)
     
     # [新增] 處理 COMPLETED 狀態
-    if current_level_id == 'COMPLETED':
+    if current_state == 'COMPLETED':
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text="🎉 恭喜您已完成所有挑戰！如果您想重新開始，請輸入「RESET」或「重置」。")
@@ -295,14 +302,16 @@ def handle_message(event):
         return
 
     # [新增] 處理 WELCOME 狀態和 START 啟動指令
-    if current_level_id == 'WELCOME':
+    if current_state == 'WELCOME':
         if user_message_upper == 'START' or user_message_upper == '開始':
             # 進入 L01
             try:
-                update_user_level(user_id, 'L01')
+                # 設置狀態為 L01_ANSWERING
+                update_user_level(user_id, 'L01_ANSWERING')
                 
                 level_data = get_level_details('L01')
                 if level_data:
+                    # 解包關卡資訊：(level_id, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
                     _, question_text, question_image_url, _, _, _ = level_data
                     
                     reply_messages = [
@@ -334,11 +343,16 @@ def handle_message(event):
                 TextSendMessage(text="請輸入「START」或「開始」以展開您的圓山探險旅程。")
             )
             return
-
-    # 從這裡開始 current_level_id 必然是有效的 Lxx 關卡 ID
-    level_data = get_level_details(current_level_id)
     
-    if not level_data:
+    # --- 從這裡開始 current_state 必然是 Lxx_ANSWERING 或 Lxx_WAITING ---
+
+    # 取得當前的基礎關卡 ID (例如從 'L03_ANSWERING' 取得 'L03')
+    base_level_id = current_state.split('_')[0] 
+    
+    # 取得當前關卡的詳細資訊
+    current_level_data = get_level_details(base_level_id)
+    
+    if not current_level_data:
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text="🚨 遊戲系統錯誤：找不到關卡數據。請聯繫管理員檢查資料庫初始化。")
@@ -346,73 +360,131 @@ def handle_message(event):
         return
 
     # 解包關卡資訊：(level_id, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
-    level_id_db, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url = level_data
-
-    # 3. 答案比對邏輯
-    is_correct = clean_answer(user_input) == clean_answer(correct_answer_raw)
-
-    if is_correct:
-        # **答對處理**
+    _, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url = current_level_data
+    
+    
+    # 3. 處理等待 (WAITING) 狀態 - 玩家應該要輸入「我到了」/「到」
+    if current_state.endswith('_WAITING'):
         
-        # 尋找下一關的 ID (例如 L01 -> L02)
-        try:
-            current_level_num = int(current_level_id[1:])
-            next_level_id = 'L' + str(current_level_num + 1).zfill(2)
-        except ValueError:
-            next_level_id = 'COMPLETED' 
-        
-        next_level_data = get_level_details(next_level_id)
-
-        # 1. 初始訊息列表
-        reply_messages = []
-        
-        if next_level_data:
-            # 還有下一關
-            update_user_level(user_id, next_level_id)
+        # 檢查是否為到達確認指令
+        if user_input_normalized == '我到了' or user_input_normalized == '到':
             
-            # 解包下一關的題目資訊
-            _, next_question_text, next_question_image_url, _, _, _ = next_level_data
+            # 1. 成功確認到達，準備進入下一關
+            try:
+                # 找出下一關的 ID
+                current_level_num = int(base_level_id[1:])
+                next_level_id = 'L' + str(current_level_num + 1).zfill(2)
+            except ValueError:
+                # 理論上不應該發生，但作為防呆
+                next_level_id = 'COMPLETED' 
+                
+            # 取得下一關的題目資訊
+            next_level_data = get_level_details(next_level_id)
+            reply_messages = []
 
-            # 1. 發送當前關卡的【線索/轉場訊息】與下一關的【題目文字】，合併為一則訊息
-            full_text_message = f"{next_clue_text}\n\n【{next_level_id} 挑戰】\n{next_question_text}"
-            reply_messages.append(TextSendMessage(text=full_text_message))
+            if next_level_data:
+                # 還有下一關，發送題目
+                
+                # 更新狀態到下一關的 ANSWERING 模式
+                update_user_level(user_id, f'{next_level_id}_ANSWERING')
+                
+                _, next_question_text, next_question_image_url, _, _, _ = next_level_data
+
+                reply_messages.append(TextSendMessage(text=f"📍 **確認到達！**\n\n【{next_level_id} 挑戰】\n{next_question_text}"))
+                
+                # 發送下一關的題目圖片
+                if next_question_image_url:
+                    reply_messages.append(
+                        ImageSendMessage(
+                            original_content_url=next_question_image_url,
+                            preview_image_url=next_question_image_url 
+                        )
+                    )
+            else:
+                # 這是最後一關的到達確認，遊戲結束 (L06之後)
+                update_user_level(user_id, 'COMPLETED') 
+                reply_messages.append(TextSendMessage(text=LEVEL_DATA['L06']['next_clue']))
+
+
+            line_bot_api.reply_message(event.reply_token, reply_messages)
             
-            # 2. 發送下一關的題目圖片
-            if next_question_image_url:
+        else:
+            # 提示玩家當前正在等待到達確認
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text="🧭 您已在前往下一地點的路上，請到達後輸入「我到了」或「到」以獲取謎題。")
+            )
+        return
+        
+    # 4. 處理答題 (ANSWERING) 狀態
+    elif current_state.endswith('_ANSWERING'):
+        
+        # 答案比對邏輯
+        is_correct = user_input_normalized == clean_answer(correct_answer_raw)
+
+        if is_correct:
+            # **答對處理：先給線索，然後進入 WAITING 狀態**
+            
+            # 1. 初始訊息列表
+            reply_messages = []
+            
+            # 這是最後一關的答案
+            if base_level_id == 'L06':
+                update_user_level(user_id, 'COMPLETED') 
+                reply_messages.append(TextSendMessage(text=next_clue_text))
+            
+            else:
+                # 非最後一關，發送下一地點的線索
+                
+                # 判斷下一關的 ID (L01 -> L02)
+                current_level_num = int(base_level_id[1:])
+                next_level_id = 'L' + str(current_level_num + 1).zfill(2)
+                
+                # 更新狀態到 WAITING 模式
+                update_user_level(user_id, f'{base_level_id}_WAITING')
+                
+                # 發送線索/轉場訊息
+                reply_messages.append(TextSendMessage(text=next_clue_text))
+                
+                # 發送線索圖片 (如果有的話)
+                if next_clue_image_url:
+                    reply_messages.append(
+                        ImageSendMessage(
+                            original_content_url=next_clue_image_url,
+                            preview_image_url=next_clue_image_url 
+                        )
+                    )
+                
+                reply_messages.append(TextSendMessage(text="請抵達地點後，輸入「我到了」或「到」來領取下一關的謎題！"))
+
+            line_bot_api.reply_message(event.reply_token, reply_messages)
+
+        else:
+            # **答錯處理** - 顯示當前關卡資訊，包含圖片
+            reply_messages = [
+                TextSendMessage(text="❌ 答案不正確，請再仔細觀察現場或提示。"),
+                TextSendMessage(text=f"【當前挑戰：{base_level_id}】\n{question_text}")
+            ]
+
+            if question_image_url:
                 reply_messages.append(
                     ImageSendMessage(
-                        original_content_url=next_question_image_url,
-                        preview_image_url=next_question_image_url 
+                        original_content_url=question_image_url,
+                        preview_image_url=question_image_url
                     )
                 )
 
-        else:
-            # 這是最後一關
-            update_user_level(user_id, 'COMPLETED') 
-            reply_messages.append(TextSendMessage(text=next_clue_text))
-
-        line_bot_api.reply_message(event.reply_token, reply_messages)
-
-    else:
-        # **答錯處理** - 顯示當前關卡資訊，包含圖片
-        reply_messages = [
-            TextSendMessage(text="❌ 答案不正確，請再仔細觀察現場。"),
-            TextSendMessage(text=f"【當前挑戰：{current_level_id}】\n{question_text}")
-        ]
-
-        if question_image_url:
-            reply_messages.append(
-                ImageSendMessage(
-                    original_content_url=question_image_url,
-                    preview_image_url=question_image_url
-                )
+            line_bot_api.reply_message(
+                event.reply_token,
+                reply_messages
             )
 
+    else:
+        # 處理未知狀態
         line_bot_api.reply_message(
             event.reply_token,
-            reply_messages
+            TextSendMessage(text="🤔 狀態錯誤，請輸入「RESET」或「重置」來重新開始遊戲。")
         )
-
 
 # --- 確保在應用程式啟動時運行資料庫初始化 ---
 # Gunicorn/Render 啟動時會運行這個區塊，確保資料庫表格和數據存在
