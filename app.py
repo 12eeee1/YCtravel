@@ -44,7 +44,7 @@ WELCOME_MESSAGE = (
 # **【更新】新增 special_hint 欄位**
 LEVEL_DATA = {
     'L01': {
-        'intro_text': '【L01 任務啟動】您已經踏上了旅途的起點。請抬頭看看指標，找到第一個線索！',
+        'intro_text': '【起點：啟程與覺醒】\n\n旅程從圓山開始。百年前的火車聲與風聲交織，你是否聽見「大龍峒」的呼喚？\n\n這裡，是圓山的起點，也是時間的入口。',
         'question': '圓山站的日文拼音是什麼？（出捷運站時，有聽到廣播嗎？），請輸入羅馬拼音。',
         'question_image': None,
         'answer': 'Maruyama',
@@ -54,7 +54,7 @@ LEVEL_DATA = {
         'next_level_id': 'L02'
     },
     'L02': {
-        'intro_text': '【L02 知識之門】現在您站在知識的殿堂前，這些古老的符號將引導您進入文化的深處。',
+        'intro_text': '【知識之門】現在您站在知識的殿堂前，這些古老的符號將引導您進入文化的深處。',
         'question': '🙏🎸🏹🐴🧮✈️ 這六個符號分別代表什麼？',
         'question_image': None,
         'answer': '禮樂射御書數',
@@ -64,7 +64,7 @@ LEVEL_DATA = {
         'next_level_id': 'L03'
     },
     'L03': {
-        'intro_text': '【L03 神祇的守護】您已來到庇佑眾生的聖地。請在外圍仔細觀察，古老的碑文藏著此地的秘密。',
+        'intro_text': '【信仰的起點】書聲與香煙共存的地方。在祈願平安的同時，也是人心安定、學問延續的起點。石碑上被塗黑的字，似乎藏著信仰與記憶的交會。',
         'question': '側城牆邊的碑文，碑文上刻著甚麼字？',
         'question_image': None,
         'answer': '保安', 
@@ -74,7 +74,7 @@ LEVEL_DATA = {
         'next_level_id': 'L04'
     },
     'L04': {
-        'intro_text': '【L04 藏匿的線索】請找到目標石碑，只有將眼光放低，才能發現探險隊留下的暗號！',
+        'intro_text': '【社區的記憶】街市早已消逝，但聲音仍在巷弄中回蕩。每一「坎」都有一段故事，每一扇門後都藏著時間的皺摺。拼湊過去的碎片，你會找到通往下一扇門的字。',
         'question': '請依照取得的線索，解開謎底',
         'question_image': 'https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/04.jpg',
         'answer': '頂', 
@@ -84,7 +84,7 @@ LEVEL_DATA = {
         'next_level_id': 'L05'
     },
     'L05': {
-        'intro_text': '【L05 書院迷蹤】在古老的書院中，有一份實體寶藏等待著您。找到它，才能拿到真正的謎題卡。',
+        'intro_text': '【祈願之所】書聲藏於巷內。每年考季，供桌上會出現象徵靈感與好運的供品。百年樹人，書香未歇。',
         'question': '請到指定位置尋找實體寶藏、並從中獲取題目',
         'question_image': None,
         'answer': '鳳梨', 
@@ -94,11 +94,21 @@ LEVEL_DATA = {
         'next_level_id': 'L06'
     },
     'L06': {
-        'intro_text': '【L06 終極解密】這是您最後的挑戰！結合您目前所有的發現，解開這串數字背後的意義。',
+        'intro_text': '【理解之課】不是所有聲音都用耳朵聽見，有些知識，必須用心感受。手語，是另一種文字，書本，是另一種傾聽。找到那本藏著老師府舊影的書吧——它會指引你前往最終的歸宿。',
         'question': '解開題目後，可以跟我確認答案(不須輸入空格、標點符號)',
         'question_image': "https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/05.jpg",
         'answer': '53878337515', 
         'special_hint': '🤔 提示：這是一組電話號碼，請將您在所有關卡中獲得的關鍵字，轉換成注音或倉頡輸入法的數字鍵盤組合。', # NEW
+        'next_clue': '恭喜你找到了那本書的索書碼，請前往圖書館找出此書',
+        'next_clue_image': None,
+        'next_level_id': 'L07'
+    },
+        'L07': {
+        'intro_text': '【歸返與傳承】你來到老師府，書中的照片，重現在你眼前。老師已不在，但他的精神仍在街巷間流動。教育、信仰、知識、理解——這些線索在你腳下交織成故事的圓。',
+        'question': '依據書中照片的線索，找到一個實體寶藏',
+        'question_image': None,
+        'answer': '53878337515', 
+        'special_hint': '現代的老師里，都有守望相助隊，我們認為這是延續昔日鄰里互助的精神。', # NEW
         'next_clue': '🎉 恭喜您完成所有關卡，探險成功！',
         'next_clue_image': None,
         'next_level_id': 'COMPLETED'
