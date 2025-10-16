@@ -41,9 +41,10 @@ WELCOME_MESSAGE = (
 
 
 # --- 關卡數據 (Level Data) ---
-# L04 和 L06 的圖片 URL 已使用您提供的 GitHub 連結。
+# **【新增】intro_text 欄位，用於在題目發出前推送的文案，請替換成您自己的文案**
 LEVEL_DATA = {
     'L01': {
+        'intro_text': '【L01 任務啟動】您已經踏上了旅途的起點。請抬頭看看指標，找到第一個線索！',
         'question': '圓山站的日文拼音是什麼？（出捷運站時，有聽到廣播嗎？），請輸入羅馬拼音。',
         'question_image': None,
         'answer': 'Maruyama',
@@ -52,6 +53,7 @@ LEVEL_DATA = {
         'next_level_id': 'L02'
     },
     'L02': {
+        'intro_text': '【L02 知識之門】現在您站在知識的殿堂前，這些古老的符號將引導您進入文化的深處。',
         'question': '🙏🎸🏹🐴🧮✈️ 這六個符號分別代表什麼？',
         'question_image': None,
         'answer': '禮樂射御書數',
@@ -60,6 +62,7 @@ LEVEL_DATA = {
         'next_level_id': 'L03'
     },
     'L03': {
+        'intro_text': '【L03 神祇的守護】您已來到庇佑眾生的聖地。請在外圍仔細觀察，古老的碑文藏著此地的秘密。',
         'question': '側城牆邊的碑文，碑文上刻著甚麼字？',
         'question_image': None,
         'answer': '保安', 
@@ -68,6 +71,7 @@ LEVEL_DATA = {
         'next_level_id': 'L04'
     },
     'L04': {
+        'intro_text': '【L04 藏匿的線索】請找到目標石碑，只有將眼光放低，才能發現探險隊留下的暗號！',
         'question': '請依照取得的線索，解開謎底',
         'question_image': 'https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/04.jpg',
         'answer': '頂', 
@@ -76,6 +80,7 @@ LEVEL_DATA = {
         'next_level_id': 'L05'
     },
     'L05': {
+        'intro_text': '【L05 書院迷蹤】在古老的書院中，有一份實體寶藏等待著您。找到它，才能拿到真正的謎題卡。',
         'question': '請到指定位置尋找實體寶藏、並從中獲取題目',
         'question_image': None,
         'answer': '鳳梨', 
@@ -84,6 +89,7 @@ LEVEL_DATA = {
         'next_level_id': 'L06'
     },
     'L06': {
+        'intro_text': '【L06 終極解密】這是您最後的挑戰！結合您目前所有的發現，解開這串數字背後的意義。',
         'question': '解開題目後，可以跟我確認答案(不須輸入空格、標點符號)',
         'question_image': "https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/05.jpg",
         'answer': '53878337515', 
@@ -111,9 +117,11 @@ def setup_db():
         cursor = conn.cursor()
         
         # 1. 建立 levels 表格 (如果不存在) 
+        # 【更新】新增 intro_text 欄位
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS levels (
                 level_id VARCHAR(10) PRIMARY KEY,
+                intro_text TEXT,               -- 新增：題目發出前的介紹文案
                 question_text TEXT NOT NULL,
                 question_image_url TEXT, -- 題目圖片欄位
                 correct_answer VARCHAR(255) NOT NULL,
@@ -122,12 +130,11 @@ def setup_db():
             );
         """)
 
-        # 2. 建立 users 表格 (追蹤玩家進度)
-        # current_level 現在用於儲存狀態，例如 'L01_ANSWERING' 或 'L01_WAITING'
+        # 2. 建立 users 表格 (追蹤玩家進度) - 沿用上次修正的 VARCHAR(50)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id VARCHAR(255) PRIMARY KEY,
-                current_level VARCHAR(30) NOT NULL, -- 加大長度以容納狀態字串
+                current_level VARCHAR(50) NOT NULL, -- 使用 VARCHAR(50) 以容納狀態字串
                 last_activity_time TIMESTAMP WITHOUT TIME ZONE
             );
         """)
@@ -138,14 +145,15 @@ def setup_db():
             cursor.execute("SELECT level_id FROM levels WHERE level_id = %s", (level_id,))
             
             if cursor.fetchone():
-                # 存在則 UPDATE
+                # 存在則 UPDATE (【更新】包含 intro_text)
                 cursor.execute(
                     """
                     UPDATE levels
-                    SET question_text = %s, question_image_url = %s, correct_answer = %s, next_clue_text = %s, next_clue_image_url = %s
+                    SET intro_text = %s, question_text = %s, question_image_url = %s, correct_answer = %s, next_clue_text = %s, next_clue_image_url = %s
                     WHERE level_id = %s;
                     """,
                     (
+                        data['intro_text'],     # 新增欄位
                         data['question'], 
                         data['question_image'],
                         data['answer'], 
@@ -155,14 +163,15 @@ def setup_db():
                     )
                 )
             else:
-                # 不存在則 INSERT
+                # 不存在則 INSERT (【更新】包含 intro_text)
                 cursor.execute(
                     """
-                    INSERT INTO levels (level_id, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
-                    VALUES (%s, %s, %s, %s, %s, %s);
+                    INSERT INTO levels (level_id, intro_text, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s);
                     """,
                     (
                         level_id, 
+                        data['intro_text'],     # 新增欄位
                         data['question'], 
                         data['question_image'], 
                         data['answer'], 
@@ -177,7 +186,6 @@ def setup_db():
 
     except Exception as e:
         print(f"PostgreSQL 資料庫初始化失敗: {e}") 
-        # 即使初始化失敗，也讓應用程式繼續運行（但會影響功能）
         pass
 
 
@@ -206,8 +214,9 @@ def get_level_details(level_id):
     """根據關卡ID取得關卡內容。"""
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT level_id, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url FROM levels WHERE level_id = %s", (level_id,))
-    # 回傳結果：(level_id, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
+    # 【更新】新增 intro_text 欄位
+    cursor.execute("SELECT level_id, intro_text, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url FROM levels WHERE level_id = %s", (level_id,))
+    # 回傳結果：(level_id, intro_text, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
     details = cursor.fetchone()
     conn.close()
     return details
@@ -311,11 +320,12 @@ def handle_message(event):
                 
                 level_data = get_level_details('L01')
                 if level_data:
-                    # 解包關卡資訊：(level_id, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
-                    _, question_text, question_image_url, _, _, _ = level_data
+                    # 解包關卡資訊 (現在有 7 個元素)：(level_id, intro_text, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
+                    _, intro_text, question_text, question_image_url, _, _, _ = level_data
                     
                     reply_messages = [
                         TextSendMessage(text="🚀 旅程開始！祝您探險愉快。"),
+                        TextSendMessage(text=intro_text), # 【新增】發送介紹文案
                         TextSendMessage(text=f"【L01 挑戰】\n{question_text}")
                     ]
                     
@@ -359,8 +369,8 @@ def handle_message(event):
         )
         return
 
-    # 解包關卡資訊：(level_id, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
-    _, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url = current_level_data
+    # 解包關卡資訊：(level_id, intro_text, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
+    _, intro_text, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url = current_level_data
     
     
     # 3. 處理等待 (WAITING) 狀態 - 玩家應該要輸入「我到了」/「到」
@@ -375,7 +385,6 @@ def handle_message(event):
                 current_level_num = int(base_level_id[1:])
                 next_level_id = 'L' + str(current_level_num + 1).zfill(2)
             except ValueError:
-                # 理論上不應該發生，但作為防呆
                 next_level_id = 'COMPLETED' 
                 
             # 取得下一關的題目資訊
@@ -388,9 +397,18 @@ def handle_message(event):
                 # 更新狀態到下一關的 ANSWERING 模式
                 update_user_level(user_id, f'{next_level_id}_ANSWERING')
                 
-                _, next_question_text, next_question_image_url, _, _, _ = next_level_data
+                # 解包下一關資訊 (現在有7個元素)
+                _, next_intro_text, next_question_text, next_question_image_url, _, _, _ = next_level_data
 
-                reply_messages.append(TextSendMessage(text=f"📍 **確認到達！**\n\n【{next_level_id} 挑戰】\n{next_question_text}"))
+                # 發送確認到達訊息
+                reply_messages.append(TextSendMessage(text=f"📍 **確認到達！**"))
+                
+                # 【新增】發送下一關的介紹文案
+                if next_intro_text:
+                    reply_messages.append(TextSendMessage(text=next_intro_text)) 
+                    
+                # 發送下一關的題目
+                reply_messages.append(TextSendMessage(text=f"【{next_level_id} 挑戰】\n{next_question_text}"))
                 
                 # 發送下一關的題目圖片
                 if next_question_image_url:
@@ -438,9 +456,10 @@ def handle_message(event):
                 
                 # 判斷下一關的 ID (L01 -> L02)
                 current_level_num = int(base_level_id[1:])
+                # 檢查 LEVEL_DATA 中是否有下一關，如果沒有則視為 COMPLETED
                 next_level_id = 'L' + str(current_level_num + 1).zfill(2)
                 
-                # 更新狀態到 WAITING 模式
+                # 更新狀態到 WAITING 模式 (使用當前關卡 ID，但狀態改為 WAITING)
                 update_user_level(user_id, f'{base_level_id}_WAITING')
                 
                 # 發送線索/轉場訊息
@@ -463,6 +482,8 @@ def handle_message(event):
             # **答錯處理** - 顯示當前關卡資訊，包含圖片
             reply_messages = [
                 TextSendMessage(text="❌ 答案不正確，請再仔細觀察現場或提示。"),
+                # 【修正】答錯時，應重新發送介紹文案和題目，確保用戶看到完整提示
+                TextSendMessage(text=intro_text), 
                 TextSendMessage(text=f"【當前挑戰：{base_level_id}】\n{question_text}")
             ]
 
