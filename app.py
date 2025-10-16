@@ -41,13 +41,14 @@ WELCOME_MESSAGE = (
 
 
 # --- 關卡數據 (Level Data) ---
-# **【新增】intro_text 欄位，用於在題目發出前推送的文案，請替換成您自己的文案**
+# **【更新】新增 special_hint 欄位**
 LEVEL_DATA = {
     'L01': {
         'intro_text': '【L01 任務啟動】您已經踏上了旅途的起點。請抬頭看看指標，找到第一個線索！',
         'question': '圓山站的日文拼音是什麼？（出捷運站時，有聽到廣播嗎？），請輸入羅馬拼音。',
         'question_image': None,
         'answer': 'Maruyama',
+        'special_hint': '🤔 提示：請仔細聆聽或查看捷運站內的指示牌。記得要輸入羅馬拼音，且首字母大寫喔！', # NEW
         'next_clue': '✅ 答對了！從圓山啟程，接下來，我們要走進知識與禮樂的門。\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
         'next_clue_image': None,
         'next_level_id': 'L02'
@@ -57,6 +58,7 @@ LEVEL_DATA = {
         'question': '🙏🎸🏹🐴🧮✈️ 這六個符號分別代表什麼？',
         'question_image': None,
         'answer': '禮樂射御書數',
+        'special_hint': '🤔 提示：這些符號代表著古代君子必須學習的「六藝」。請試著輸入中文全稱，不要輸入空格。', # NEW
         'next_clue': '✅ 很好！你已通過學問之門。下一站，前往信仰與教化交會之地。\n\n請前往https://maps.app.goo.gl/gD9w5eFzRzJ8fX9A7',
         'next_clue_image': None,
         'next_level_id': 'L03'
@@ -66,6 +68,7 @@ LEVEL_DATA = {
         'question': '側城牆邊的碑文，碑文上刻著甚麼字？',
         'question_image': None,
         'answer': '保安', 
+        'special_hint': '🤔 提示：請尋找位於宮廟「側邊」的古老石碑，它們通常刻有關於該宮廟名稱的關鍵詞。', # NEW
         'next_clue': '✅ 恭喜解鎖 L04！請回到保安宮正門對面，找到圖片中的石碑，石碑後方草叢藏著下一關的線索!',
         'next_clue_image': None,
         'next_level_id': 'L04'
@@ -75,6 +78,7 @@ LEVEL_DATA = {
         'question': '請依照取得的線索，解開謎底',
         'question_image': 'https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/04.jpg',
         'answer': '頂', 
+        'special_hint': '🤔 提示：這個字看起來像什麼東西的「頂部」？請試著從石碑後方的小紙條上找到線索！', # NEW
         'next_clue': '✅ 恭喜解鎖 L05！請前往樹人書院解開下一關謎題。',
         'next_clue_image': None,
         'next_level_id': 'L05'
@@ -84,6 +88,7 @@ LEVEL_DATA = {
         'question': '請到指定位置尋找實體寶藏、並從中獲取題目',
         'question_image': None,
         'answer': '鳳梨', 
+        'special_hint': '🤔 提示：請在書院內尋找一個「有頭有臉」的吉祥物，它代表著「旺來」的好運。', # NEW
         'next_clue': '看不太懂下面這張圖片想表達什麼嗎？ 前往下一個地點找看看線索吧！\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
         'next_clue_image': None,
         'next_level_id': 'L06'
@@ -93,6 +98,7 @@ LEVEL_DATA = {
         'question': '解開題目後，可以跟我確認答案(不須輸入空格、標點符號)',
         'question_image': "https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/05.jpg",
         'answer': '53878337515', 
+        'special_hint': '🤔 提示：這是一組電話號碼，請將您在所有關卡中獲得的關鍵字，轉換成注音或倉頡輸入法的數字鍵盤組合。', # NEW
         'next_clue': '🎉 恭喜您完成所有關卡，探險成功！',
         'next_clue_image': None,
         'next_level_id': 'COMPLETED'
@@ -116,9 +122,8 @@ def setup_db():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # === 【修復】資料庫遷移：確保 intro_text 欄位存在 (解決 "column intro_text does not exist" 錯誤) ===
+        # === 【修復】資料庫遷移：確保 intro_text 欄位存在 ===
         try:
-            # 嘗試新增 intro_text 欄位。如果表格已存在但沒有此欄位，則新增。
             cursor.execute("""
                 ALTER TABLE levels
                 ADD COLUMN intro_text TEXT;
@@ -126,22 +131,40 @@ def setup_db():
             conn.commit()
             print("資料庫遷移成功：已為 levels 表格新增 intro_text 欄位。")
         except psycopg2.ProgrammingError as e:
-            # 捕獲 ProgrammingError (例如 "column 'intro_text' already exists")
             if 'already exists' in str(e):
-                conn.rollback() # 欄位已存在，回滾 ALTER TABLE 事務
+                conn.rollback() 
                 print("intro_text 欄位已存在，略過遷移。")
             elif 'does not exist' in str(e):
-                # 如果 levels 表格還不存在，不用擔心，下面會 CREATE
                 conn.rollback()
             else:
-                raise e # 拋出其他未預期的 ProgrammingError
+                raise e 
+        # === 遷移結束 ===
+        
+        # === 【新增】資料庫遷移：確保 special_hint 欄位存在 ===
+        try:
+            cursor.execute("""
+                ALTER TABLE levels
+                ADD COLUMN special_hint TEXT;
+            """)
+            conn.commit()
+            print("資料庫遷移成功：已為 levels 表格新增 special_hint 欄位。")
+        except psycopg2.ProgrammingError as e:
+            if 'already exists' in str(e):
+                conn.rollback() 
+                print("special_hint 欄位已存在，略過遷移。")
+            elif 'does not exist' in str(e):
+                conn.rollback()
+            else:
+                raise e
         # === 遷移結束 ===
 
-        # 1. 建立 levels 表格 (如果不存在) - 包含最新的 intro_text
+
+        # 1. 建立 levels 表格 (如果不存在) - 包含最新的 intro_text 和 special_hint
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS levels (
                 level_id VARCHAR(10) PRIMARY KEY,
-                intro_text TEXT,               -- 新增：題目發出前的介紹文案
+                intro_text TEXT, 
+                special_hint TEXT,           -- 新增：特殊提示
                 question_text TEXT NOT NULL,
                 question_image_url TEXT, -- 題目圖片欄位
                 correct_answer VARCHAR(255) NOT NULL,
@@ -165,15 +188,16 @@ def setup_db():
             cursor.execute("SELECT level_id FROM levels WHERE level_id = %s", (level_id,))
             
             if cursor.fetchone():
-                # 存在則 UPDATE (【更新】包含 intro_text)
+                # 存在則 UPDATE (【更新】包含 intro_text 和 special_hint)
                 cursor.execute(
                     """
                     UPDATE levels
-                    SET intro_text = %s, question_text = %s, question_image_url = %s, correct_answer = %s, next_clue_text = %s, next_clue_image_url = %s
+                    SET intro_text = %s, special_hint = %s, question_text = %s, question_image_url = %s, correct_answer = %s, next_clue_text = %s, next_clue_image_url = %s
                     WHERE level_id = %s;
                     """,
                     (
-                        data['intro_text'],     # 新增欄位
+                        data['intro_text'], 
+                        data['special_hint'],    # 新增欄位
                         data['question'], 
                         data['question_image'],
                         data['answer'], 
@@ -183,15 +207,16 @@ def setup_db():
                     )
                 )
             else:
-                # 不存在則 INSERT (【更新】包含 intro_text)
+                # 不存在則 INSERT (【更新】包含 intro_text 和 special_hint)
                 cursor.execute(
                     """
-                    INSERT INTO levels (level_id, intro_text, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s);
+                    INSERT INTO levels (level_id, intro_text, special_hint, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
                     """,
                     (
                         level_id, 
-                        data['intro_text'],     # 新增欄位
+                        data['intro_text'], 
+                        data['special_hint'],    # 新增欄位
                         data['question'], 
                         data['question_image'], 
                         data['answer'], 
@@ -234,9 +259,9 @@ def get_level_details(level_id):
     """根據關卡ID取得關卡內容。"""
     conn = get_db_connection()
     cursor = conn.cursor()
-    # 【更新】新增 intro_text 欄位，這就是引發錯誤的查詢，現在資料庫結構已修復
-    cursor.execute("SELECT level_id, intro_text, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url FROM levels WHERE level_id = %s", (level_id,))
-    # 回傳結果：(level_id, intro_text, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
+    # 【更新】新增 special_hint 欄位，現在總共選擇 8 個欄位
+    cursor.execute("SELECT level_id, intro_text, special_hint, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url FROM levels WHERE level_id = %s", (level_id,))
+    # 回傳結果：(level_id, intro_text, special_hint, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
     details = cursor.fetchone()
     conn.close()
     return details
@@ -340,12 +365,13 @@ def handle_message(event):
                 
                 level_data = get_level_details('L01')
                 if level_data:
-                    # 解包關卡資訊 (現在有 7 個元素)：(level_id, intro_text, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
-                    _, intro_text, question_text, question_image_url, _, _, _ = level_data
+                    # 解包關卡資訊 (現在有 8 個元素，跳過 special_hint 和答案相關)
+                    # (level_id, intro_text, special_hint, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
+                    _, intro_text, _, question_text, question_image_url, _, _, _ = level_data
                     
                     reply_messages = [
                         TextSendMessage(text="🚀 旅程開始！祝您探險愉快。"),
-                        TextSendMessage(text=intro_text), # 【新增】發送介紹文案
+                        TextSendMessage(text=intro_text), # 發送介紹文案
                         TextSendMessage(text=f"【L01 挑戰】\n{question_text}")
                     ]
                     
@@ -389,8 +415,8 @@ def handle_message(event):
         )
         return
 
-    # 解包關卡資訊：(level_id, intro_text, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
-    _, intro_text, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url = current_level_data
+    # 解包關卡資訊：(level_id, intro_text, special_hint, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
+    _, intro_text, special_hint, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url = current_level_data
     
     
     # 3. 處理等待 (WAITING) 狀態 - 玩家應該要輸入「我到了」/「到」
@@ -417,13 +443,14 @@ def handle_message(event):
                 # 更新狀態到下一關的 ANSWERING 模式
                 update_user_level(user_id, f'{next_level_id}_ANSWERING')
                 
-                # 解包下一關資訊 (現在有7個元素)
-                _, next_intro_text, next_question_text, next_question_image_url, _, _, _ = next_level_data
+                # 解包下一關資訊 (現在有8個元素)
+                # (level_id, intro_text, special_hint, question_text, question_image_url, correct_answer_raw, next_clue_text, next_clue_image_url)
+                _, next_intro_text, _, next_question_text, next_question_image_url, _, _, _ = next_level_data
 
                 # 發送確認到達訊息
                 reply_messages.append(TextSendMessage(text=f"📍 **確認到達！**"))
                 
-                # 【新增】發送下一關的介紹文案
+                # 發送下一關的介紹文案
                 if next_intro_text:
                     reply_messages.append(TextSendMessage(text=next_intro_text)) 
                     
@@ -499,21 +526,12 @@ def handle_message(event):
             line_bot_api.reply_message(event.reply_token, reply_messages)
 
         else:
-            # **答錯處理** - 顯示當前關卡資訊，包含圖片
+            # **答錯處理** - 僅發送特殊提示 (special_hint)
             reply_messages = [
-                TextSendMessage(text="❌ 答案不正確，請再仔細觀察現場或提示。"),
-                # 【修正】答錯時，應重新發送介紹文案和題目，確保用戶看到完整提示
-                TextSendMessage(text=intro_text), 
-                TextSendMessage(text=f"【當前挑戰：{base_level_id}】\n{question_text}")
+                TextSendMessage(text="❌ 答案不正確！這裡有個小小的提示幫助你："),
+                # 只發送特殊提示，不重複發送 intro_text 或 question_text
+                TextSendMessage(text=special_hint) 
             ]
-
-            if question_image_url:
-                reply_messages.append(
-                    ImageSendMessage(
-                        original_content_url=question_image_url,
-                        preview_image_url=question_image_url
-                    )
-                )
 
             line_bot_api.reply_message(
                 event.reply_token,
