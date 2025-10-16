@@ -23,11 +23,22 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # 修正：使用大寫變數名稱，並修正縮排字元
 if not CHANNEL_ACCESS_TOKEN or not CHANNEL_SECRET:
-    # 這是原本有問題的第 25 行，請確保這裡的縮排是標準空格或 Tab
     raise ValueError("請設定 LINE_CHANNEL_ACCESS_TOKEN 和 LINE_CHANNEL_SECRET")
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
+
+
+# [新增] 歡迎訊息常量，供 FollowEvent 和 重置指令使用
+WELCOME_MESSAGE = (
+    "🌿 歡迎來到《圓山探險隊》。\n"
+    "這是一場用「腳」閱讀的旅程，\n"
+    "也是一場用「心」傾聽的課程。\n\n"
+    "當你準備好，\n"
+    "請輸入「START」或「開始」展開旅程，\n"
+    "讓故事，從圓山的風裡開始說起。"
+)
+
 
 # --- 關卡數據 (Level Data) ---
 # L04 和 L06 的圖片 URL 已使用您提供的 GitHub 連結。
@@ -231,17 +242,9 @@ def callback():
     
     return 'OK'
 
-# [新增] 處理新用戶追蹤事件 (Follow Event)
+# [更新] 處理新用戶追蹤事件 (Follow Event) - 使用全域常量
 @handler.add(FollowEvent)
 def handle_follow(event):
-    welcome_message = (
-        "🌿 歡迎來到《圓山探險隊》。\n"
-        "這是一場用「腳」閱讀的旅程，\n"
-        "也是一場用「心」傾聽的課程。\n\n"
-        "當你準備好，\n"
-        "請輸入「START」或「開始」展開旅程，\n"
-        "讓故事，從圓山的風裡開始說起。"
-    )
     user_id = event.source.user_id
     
     # 確保用戶狀態被初始化為 'WELCOME'
@@ -249,7 +252,7 @@ def handle_follow(event):
     
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=welcome_message)
+        TextSendMessage(text=WELCOME_MESSAGE) # 使用全域 WELCOME_MESSAGE
     )
 
 
@@ -264,32 +267,16 @@ def handle_message(event):
     # 1. 處理重置指令 (RESET/重置)
     if user_message_upper == 'RESET' or user_message_upper == '重置':
         try:
-            # 無論當前在哪一關，都強制設為 L01
-            update_user_level(user_id, 'L01')
+            # 關鍵變動：將用戶狀態強制設為 'WELCOME'，回到起始畫面
+            update_user_level(user_id, 'WELCOME')
             
-            # 取得 L01 的圖片和題目
-            level_data = get_level_details('L01')
-            if level_data:
-                _, question_text, question_image_url, _, _, _ = level_data
-                
-                reply_messages = [
-                    TextSendMessage(text="🕵️‍♂️ **進度已重設！** 您已回到第一關。"),
-                    TextSendMessage(text=f"【L01 挑戰】\n{question_text}")
-                ]
-                
-                # 發送 L01 題目圖片
-                if question_image_url:
-                    reply_messages.append(
-                        ImageSendMessage(
-                            original_content_url=question_image_url,
-                            preview_image_url=question_image_url 
-                        )
-                    )
-                
-                line_bot_api.reply_message(event.reply_token, reply_messages)
+            # 回覆訊息：告知重設成功，並發送歡迎訊息
+            reply_messages = [
+                TextSendMessage(text="🕵️‍♂️ **進度已重設！** 您已回到起始畫面，請輸入「START」展開旅程。"),
+                TextSendMessage(text=WELCOME_MESSAGE) 
+            ]
             
-            else:
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(text="❌ 重置進度失敗：找不到關卡數據。"))
+            line_bot_api.reply_message(event.reply_token, reply_messages)
 
         except Exception as e:
             print(f"重置進度時發生錯誤: {e}")
