@@ -111,13 +111,33 @@ def get_db_connection():
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
 def setup_db():
-    """初始化 PostgreSQL 資料庫表格並載入關卡數據。"""
+    """初始化 PostgreSQL 資料庫表格並載入關卡數據，並執行必要的遷移。"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # 1. 建立 levels 表格 (如果不存在) 
-        # 【更新】新增 intro_text 欄位
+        # === 【修復】資料庫遷移：確保 intro_text 欄位存在 (解決 "column intro_text does not exist" 錯誤) ===
+        try:
+            # 嘗試新增 intro_text 欄位。如果表格已存在但沒有此欄位，則新增。
+            cursor.execute("""
+                ALTER TABLE levels
+                ADD COLUMN intro_text TEXT;
+            """)
+            conn.commit()
+            print("資料庫遷移成功：已為 levels 表格新增 intro_text 欄位。")
+        except psycopg2.ProgrammingError as e:
+            # 捕獲 ProgrammingError (例如 "column 'intro_text' already exists")
+            if 'already exists' in str(e):
+                conn.rollback() # 欄位已存在，回滾 ALTER TABLE 事務
+                print("intro_text 欄位已存在，略過遷移。")
+            elif 'does not exist' in str(e):
+                # 如果 levels 表格還不存在，不用擔心，下面會 CREATE
+                conn.rollback()
+            else:
+                raise e # 拋出其他未預期的 ProgrammingError
+        # === 遷移結束 ===
+
+        # 1. 建立 levels 表格 (如果不存在) - 包含最新的 intro_text
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS levels (
                 level_id VARCHAR(10) PRIMARY KEY,
@@ -130,7 +150,7 @@ def setup_db():
             );
         """)
 
-        # 2. 建立 users 表格 (追蹤玩家進度) - 沿用上次修正的 VARCHAR(50)
+        # 2. 建立 users 表格 (追蹤玩家進度)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id VARCHAR(255) PRIMARY KEY,
@@ -214,7 +234,7 @@ def get_level_details(level_id):
     """根據關卡ID取得關卡內容。"""
     conn = get_db_connection()
     cursor = conn.cursor()
-    # 【更新】新增 intro_text 欄位
+    # 【更新】新增 intro_text 欄位，這就是引發錯誤的查詢，現在資料庫結構已修復
     cursor.execute("SELECT level_id, intro_text, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url FROM levels WHERE level_id = %s", (level_id,))
     # 回傳結果：(level_id, intro_text, question_text, question_image_url, correct_answer, next_clue_text, next_clue_image_url)
     details = cursor.fetchone()
