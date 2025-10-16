@@ -44,18 +44,18 @@ WELCOME_MESSAGE = (
 # L04 和 L06 的圖片 URL 已使用您提供的 GitHub 連結。
 LEVEL_DATA = {
     'L01': {
-        'question': '圓山站站名的日文為何？（羅馬拼音）\n\n（請直接回覆答案）',
+        'question': '圓山站的日文拼音是什麼？（出捷運站時，有聽到廣播嗎？），請輸入羅馬拼音。',
         'question_image': None,
         'answer': 'Maruyama',
-        'next_clue': '✅ 恭喜解鎖 L02！下一個謎題在台北孔廟。\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
+        'next_clue': '✅ 答對了！從圓山啟程，接下來，我們要走進知識與禮樂的門。\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
         'next_clue_image': None,
         'next_level_id': 'L02'
     },
     'L02': {
-        'question': '🙏🎸🏹🐴🧮✈️',
+        'question': '🙏🎸🏹🐴🧮✈️ 這六個符號分別代表什麼？',
         'question_image': None,
         'answer': '禮樂射御書數',
-        'next_clue': '✅ 恭喜解鎖 L03！下一個謎題在保安宮。\n\n請前往https://maps.app.goo.gl/gD9w5eFzRzJ8fX9A7',
+        'next_clue': '✅ 很好！你已通過學問之門。下一站，前往信仰與教化交會之地。\n\n請前往https://maps.app.goo.gl/gD9w5eFzRzJ8fX9A7',
         'next_clue_image': None,
         'next_level_id': 'L03'
     },
@@ -412,7 +412,7 @@ def handle_message(event):
             # 提示玩家當前正在等待到達確認
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text="🧭 您已在前往下一地點的路上，請到達後輸入「我到了」或「到」以獲取謎題。")
+                TextSendMessage(text="請前往下一關地點，請到達後輸入「我到了」或「到」以開始下一關的謎題!")
             )
         return
         
