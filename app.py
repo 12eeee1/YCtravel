@@ -64,32 +64,32 @@ LEVEL_DATA = {
         'next_level_id': 'L03'
     },
     'L03': {
-        'intro_text': '【信仰的起點】書聲與香煙共存的地方。在祈願平安的同時，也是人心安定、學問延續的起點。石碑上被塗黑的字，似乎藏著信仰與記憶的交會。',
-        'question': '側城牆邊的碑文，碑文上刻著甚麼字？',
-        'question_image': None,
+        'intro_text': '【信仰的起點】書聲與香煙共存的地方。在祈願平安的同時，也是人心安定、學問延續的起點。',
+        'question': '尋找前殿中的兩組刻字，尋獲後將兩位置連線，沿射線方向走進宮內，在宮內最高樓，石雕龍柱正下方的光源附近，有通往下一關的線索，請找到並將線索輸入line bot。',
+        'question_image': "https://github.com/12eeee1/YCtravel/blob/master/images/06.jpg",
         'answer': '保安', 
-        'special_hint': '🤔 提示：請尋找位於宮廟「側邊」的古老石碑，它們通常刻有關於該宮廟名稱的關鍵詞。', # NEW
+        'special_hint': '🤔 提示：1.刻字在頭頂，而且靠近(面向宮內)的左側  2.找到刻字後，需要連成射線，而且終點也會在射線上方。', # NEW
         'next_clue': '✅ 恭喜解鎖 L04！請回到保安宮正門對面，找到圖片中的石碑，石碑後方草叢藏著下一關的線索!',
         'next_clue_image': None,
         'next_level_id': 'L04'
     },
     'L04': {
         'intro_text': '【社區的記憶】街市早已消逝，但聲音仍在巷弄中回蕩。每一「坎」都有一段故事，每一扇門後都藏著時間的皺摺。拼湊過去的碎片，你會找到通往下一扇門的字。',
-        'question': '請依照取得的線索，解開謎底',
+        'question': '請回到保安宮正門口，找到圖片中的指定位置，尋找實體寶藏、並從中獲取題目。',
         'question_image': 'https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/04.jpg',
         'answer': '頂', 
-        'special_hint': '🤔 提示：這個字看起來像什麼東西的「頂部」？請試著從石碑後方的小紙條上找到線索！', # NEW
-        'next_clue': '✅ 恭喜解鎖 L05！請前往樹人書院解開下一關謎題。',
+        'special_hint': '🤔 提示：完成填字遊戲，看看它最後形成什麼字？「這個字」有「上下」的對應。', # NEW
+        'next_clue': '✅ 恭喜答對！頂街與下街，是大龍峒的兩端。接下來，前往那條藏著書香的巷弄。座標位置：https://maps.app.goo.gl/Wzpf5jd2DcXxvUoZ7',
         'next_clue_image': None,
         'next_level_id': 'L05'
     },
     'L05': {
         'intro_text': '【祈願之所】書聲藏於巷內。每年考季，供桌上會出現象徵靈感與好運的供品。百年樹人，書香未歇。',
-        'question': '請到指定位置尋找實體寶藏、並從中獲取題目',
-        'question_image': None,
+        'question': '請到尋找祈願卡(上面標有"圓山探險隊"，在比較低的位置)，並從中獲取題目',
+        'question_image': '紙上寫著甚麼呢?',
         'answer': '鳳梨', 
         'special_hint': '🤔 提示：請在書院內尋找一個「有頭有臉」的吉祥物，它代表著「旺來」的好運。', # NEW
-        'next_clue': '看不太懂下面這張圖片想表達什麼嗎？ 前往下一個地點找看看線索吧！\n\n請前往https://maps.app.goo.gl/tTZJFnZTRwAq2f36A',
+        'next_clue': '鳳梨罐頭象徵「旺來」，而礦泉水，則寓意文思泉湧。昔日書聲朗朗今藏於巷，百年樹人，書香仍在。接下來，請用心「聽見」下一個線索。座標位置：\n\n請前往https://maps.app.goo.gl/6Wa1PMt1Ta3dPvTaA',
         'next_clue_image': None,
         'next_level_id': 'L06'
     },
@@ -98,7 +98,7 @@ LEVEL_DATA = {
         'question': '解開題目後，可以跟我確認答案(不須輸入空格、標點符號)',
         'question_image': "https://raw.githubusercontent.com/12eeee1/YCtravel/refs/heads/master/images/05.jpg",
         'answer': '53878337515', 
-        'special_hint': '🤔 提示：這是一組電話號碼，請將您在所有關卡中獲得的關鍵字，轉換成注音或倉頡輸入法的數字鍵盤組合。', # NEW
+        'special_hint': '🤔 提示：手語有許多系統，請以美國系統解答。', # NEW
         'next_clue': '恭喜你找到了那本書的索書碼，請前往圖書館找出此書',
         'next_clue_image': None,
         'next_level_id': 'L07'
