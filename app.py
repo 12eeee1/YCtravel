@@ -564,3 +564,6 @@ if __name__ == "__main__":
     # 本地啟動時使用
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+# git add app.py
+#git commit -m "Feature: Added question_image_url field and display L01 image on RESET."
+#git push origin master
